@@ -1,5 +1,9 @@
 import express from 'express';
 import * as dotenv from 'dotenv';
+import cors from 'cors';
+
+import user from '../routes/user.js';
+
 dotenv.config();
 
 export default class Server {
@@ -7,31 +11,21 @@ export default class Server {
     this.app = express();
     this.port = process.env.PORT;
 
+    this.usersRoutePath = '/api/users';
     //middlewares
+    this.middlewares();
 
     this.routes();
   }
 
   middlewares() {
+    this.app.use(cors());
+    this.app.use(express.json());
     this.app.use(express.static('public'));
   }
 
   routes() {
-    this.app.get('/api', (req, res) => {
-      res.get('get');
-    });
-
-    this.app.put('/api', (req, res) => {
-      res.put('put');
-    });
-
-    this.app.post('/api', (req, res) => {
-      res.post('post');
-    });
-
-    this.app.delete('/api', (req, res) => {
-      res.delete('delete');
-    });
+    this.app.use(this.usersRoutePath, user);
   }
 
   listen() {
