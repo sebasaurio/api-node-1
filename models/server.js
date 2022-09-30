@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import cors from 'cors';
 
 import user from '../routes/user.js';
+import { dbConnection } from '../database/config';
 
 dotenv.config();
 
@@ -12,10 +13,17 @@ export default class Server {
     this.port = process.env.PORT;
 
     this.usersRoutePath = '/api/users';
+
+    this.connectDB();
+
     //middlewares
     this.middlewares();
 
     this.routes();
+  }
+
+  async connectDB(){
+    await dbConnection()
   }
 
   middlewares() {
