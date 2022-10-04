@@ -59,14 +59,15 @@ export const Put = async (req, res = response) => {
 
 export const Delete = async (req, res = response) => {
   const id = req.params.id
-
+  const userLogged = req.userLogged
   //delete fisically
   //const user = User.findByIdAndDelete({id})
 
   const user = User.findByIdAndUpdate(id, {status: false});
 
   res.json({
-    msg: 'hola',
+    user,
+    userLogged
   });
 };
 

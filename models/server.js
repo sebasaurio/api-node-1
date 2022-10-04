@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import cors from 'cors';
 
 import user from '../routes/user.js';
+import auth from '../routes/auth.js';
 import { dbConnection } from '../database/config';
 
 dotenv.config();
@@ -13,6 +14,7 @@ export default class Server {
     this.port = process.env.PORT;
 
     this.usersRoutePath = '/api/users';
+    this.authPath = '/api/auth' 
 
     this.connectDB();
 
@@ -34,6 +36,7 @@ export default class Server {
 
   routes() {
     this.app.use(this.usersRoutePath, user);
+    this.app.use(this.authPath, auth)
   }
 
   listen() {
