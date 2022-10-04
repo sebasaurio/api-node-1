@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
 import { Get, Put, Post, Delete, Patch } from '../controllers/user.js';
+import { IsAlreadyExistEmail, IsRoleValid, UserExistByEmail } from '../helpers/db-validators.js';
 import { validateFields } from '../middlewares/validator.js';
-import Role from '../models/role.js';
 
 const router = Router();
 
@@ -14,19 +14,22 @@ router.post(
     .isLength({ min: 6 })
     .not()
     .isEmpty(),
-  check('email', 'Email is not valid').isEmail(),
-  check('role').custom(async (role = '') => {
-    const existRole = await Role.findOne({ role });
-    if (!existRole) {
-      throw new Error(`Role ${role} not exist in db`);
-    }
-  }),
+  check('email').custom(IsAlreadyExistEmail),
+  check('role').custom(IsRoleValid),
   validateFields,
   Post
 );
 
-router.delete('/', Delete);
+router.delete('/:id', [
+  check('id', 'is not a valid Id').isMongoId(),
+  validateFields
+],Delete);
 router.patch('/', Patch);
-router.put('/:id', Put);
+router.put('/:id',[
+  check('id', 'is not a valid Id').isMongoId(),
+  check('id').custom(UserExistByEmail),
+  check('role').custom(IsRoleValid),
+  validateFields 
+], Put);
 
 export default router;

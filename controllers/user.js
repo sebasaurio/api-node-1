@@ -3,11 +3,19 @@ import bcryptjs from 'bcryptjs';
 
 import User from '../models/user.js';
 
-export const Get = (req, res = response) => {
-  const { q, name, key } = req.query;
+export const Get = async (req, res = response) => {
+  const { q, name, key, limit = 5, skip = 0} = req.query;
+
+  const query = {status : true}
+
+  const [ total ,users] = await Promise.all([
+    User.countDocuments(query),
+    User.find(query).skip(skip).limit(Number(limit))
+  ])
 
   res.json({
-    msg: 'hola',
+    total,
+    users
   });
 };
 
@@ -20,37 +28,43 @@ export const Post = async (req, res = response) => {
     role,
   });
 
-  //verify email
-  const alreadyExist = await User.findOne({ email });
-  if (alreadyExist) {
-    return res.status(400).json({
-      message: 'User already exist',
-    });
-  }
-
   //crypt password
   const salt = bcryptjs.genSaltSync();
   user.password = bcryptjs.hashSync(password, salt);
 
   //save user
-
-  user.save();
+  await user.save();
 
   res.json({
     user,
   });
 };
 
-export const Put = (req, res = response) => {
+export const Put = async (req, res = response) => {
   const id = req.params.id;
+  const {_id, password, asGoogle, ...otherData}  = req.body
+
+  //validate on db
+  if(password){
+    const salt = bcryptjs.genSaltSync();
+    otherData.password = bcryptjs.hashSync(password, salt);
+  }
+
+  const user = await User.findByIdAndUpdate(id, otherData)
 
   res.json({
-    msg: 'hola',
-    id,
+    user
   });
 };
 
-export const Delete = (req, res = response) => {
+export const Delete = async (req, res = response) => {
+  const id = req.params.id
+
+  //delete fisically
+  //const user = User.findByIdAndDelete({id})
+
+  const user = User.findByIdAndUpdate(id, {status: false});
+
   res.json({
     msg: 'hola',
   });
