@@ -16,8 +16,8 @@ export const isAdminRole = async(req, res, next) => {
     next()
 }
 
-export const hasValidRole = async(...roles) => {
-    return (req, res, next) => {
+export const hasValidRole = (...roles) => {
+    return  (req, res, next) => {
         if(!req.userLogged){
             return res.status(500).json({
                 message: 'user logged is required'
