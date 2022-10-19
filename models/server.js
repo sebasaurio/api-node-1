@@ -4,6 +4,8 @@ import cors from 'cors';
 
 import user from '../routes/user.js';
 import auth from '../routes/auth.js';
+import category from '../routes/category.js';
+
 import { dbConnection } from '../database/config';
 
 dotenv.config();
@@ -14,7 +16,8 @@ export default class Server {
     this.port = process.env.PORT;
 
     this.usersRoutePath = '/api/users';
-    this.authPath = '/api/auth' 
+    this.authPath = '/api/auth';
+    this.categoryPath = '/api/categories';
 
     this.connectDB();
 
@@ -24,8 +27,8 @@ export default class Server {
     this.routes();
   }
 
-  async connectDB(){
-    await dbConnection()
+  async connectDB() {
+    await dbConnection();
   }
 
   middlewares() {
@@ -36,7 +39,8 @@ export default class Server {
 
   routes() {
     this.app.use(this.usersRoutePath, user);
-    this.app.use(this.authPath, auth)
+    this.app.use(this.authPath, auth);
+    this.app.use(this.categoryPath, category);
   }
 
   listen() {

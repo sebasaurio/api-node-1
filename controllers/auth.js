@@ -40,15 +40,42 @@ export const login = async (req, res = response) => {
 export const googleSignIn = async (req, res = response) => {
   try {
     const { id_token } = req.body;
-    const googleUser = await verify(id_token);
-    console.log(googleUser);
+    const { email, name, picture } = await verify(id_token);
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      //create user
+      const data = {
+        name,
+        email,
+        password: 'test',
+        img: picture,
+        asGoogle: true,
+        role: 'USER_ROLE',
+      };
+
+      user = new User(data);
+      await user.save();
+    }
+
+    //if user in db
+    if (!user.status) {
+      return res.status(400).json({
+        message: 'Error on login, user disabled',
+      });
+    }
+
+    //generate jwt
+    const token = await generateJWT(user.id);
+    res.json({
+      message: 'Ok',
+      user,
+      token,
+    });
   } catch (error) {
     return res.status(400).json({
       message: 'Error on login with google sign in',
+      error: error,
     });
   }
-
-  res.json({
-    message: 'Ok',
-  });
 };
